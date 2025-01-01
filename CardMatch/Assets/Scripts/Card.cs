@@ -39,4 +39,9 @@ public class Card : MonoBehaviour
     {
         _cardImage.sprite = _cardFrontImage;
     }
+
+    public void ShowBack()
+    {
+        _cardImage.sprite = cardBackImage;
+    }
 }

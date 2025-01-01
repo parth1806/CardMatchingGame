@@ -90,7 +90,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 498ade07ce9343a4a8e8caaa05ead638, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cardBackImage: {fileID: 0}
+  cardBackImage: {fileID: 21300000, guid: 8ebf6b106535fd64a8ecbd556622fac1, type: 3}
 --- !u!114 &9103529034724485349
 MonoBehaviour:
   m_ObjectHideFlags: 0
