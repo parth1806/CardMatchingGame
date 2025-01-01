@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public GameObject pausePanel;
+    public GameObject levelCompletedPanel;
     public Text scoreText;
     public Text scoreComboText;
 
@@ -19,9 +20,11 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        levelCompletedPanel.SetActive(false);
         ShowPausePanel(false);
         LevelManager.Instance.OnLevelCreated += OnLevelCreated;
         LevelManager.Instance.OnLevelFinished += OnLevelFinished;
+        LevelManager.Instance.OnLevelRestart += OnLevelRestart;
         LevelManager.Instance.OnScoreAdd += OnScoreAdd;
         LevelManager.Instance.OnScoreCombo += OnShowScoreCombo;
 
@@ -50,6 +53,7 @@ public class GameManager : MonoBehaviour
     {
         // TODO level finished
         Debug.Log("Level Completed");
+        StartCoroutine(ShowLevelCompletePanel());
     }
     private void OnLevelCreated(Vector2Int vector2Int, List<Card> cards)
     {
@@ -58,6 +62,10 @@ public class GameManager : MonoBehaviour
         // TODO start timer etc etc
 
         // TODO start counting how many moves player did to complete the level
+    }
+    private void OnLevelRestart(Vector2Int vector2Int)
+    {
+        // TODO level restart
     }
 
     private void OnScoreAdd(int score)
@@ -81,9 +89,16 @@ public class GameManager : MonoBehaviour
         pausePanel.SetActive(isActive);
     }
 
+    IEnumerator ShowLevelCompletePanel()
+    {
+        yield return new WaitForSeconds(1);
+        levelCompletedPanel.SetActive(true);
+    }
+
     public void OnClickRestart()
     {
         ShowPausePanel(false);
+        LevelManager.Instance.ShowAllCardsOnRestart();
     }
 
     public void OnClickHome()

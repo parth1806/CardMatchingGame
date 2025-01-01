@@ -17,7 +17,6 @@ public class Card : MonoBehaviour
 
     public Action<Card> OnFlipped;
 
-    // Start is called before the first frame update
     void Awake()
     {
         _cardImage = GetComponent<Image>();
@@ -33,7 +32,7 @@ public class Card : MonoBehaviour
         {
             ShowFront();
         }
-        else
+        else 
         {
             ShowBack();
         }
@@ -44,14 +43,21 @@ public class Card : MonoBehaviour
         OnFlipped?.Invoke(this);
     }
 
-    public void ShowFront()
+    public void ShowFront(bool isInit = false)
     {
         _cardImage.sprite = _cardFrontImage;
+        if (!isInit)
+        {
+            IsFlipped = true;
+        }
     }
 
-    public void ShowBack()
+    public void ShowBack(bool isInit = false)
     {
-        Debug.Log("_cardImage=> " + _cardImage);
         _cardImage.sprite = cardBackImage;
+        if (!isInit)
+        {
+            IsFlipped = false;
+        }
     }
 }

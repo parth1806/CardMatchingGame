@@ -18,8 +18,6 @@ namespace SaveSystem
 
         private void Start()
         {
-            Debug.Log(Application.persistentDataPath);
-            Debug.Log("LevelManager=> " + LevelManager.Instance);
             LevelManager.Instance.OnLevelCreated += SaveLevel;
             LevelManager.Instance.OnLevelFinished += OnLevelFinished;
             LevelManager.Instance.OnCardFlipped += SaveLevel;

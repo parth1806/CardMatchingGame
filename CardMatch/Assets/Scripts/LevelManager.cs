@@ -22,10 +22,13 @@ public class LevelManager : MonoBehaviour
     private Vector2Int _gridSize;
     private int _score = 10;
     private int _comboMultiplier = 0;
+    private List<CardData> savedCardData = null;
+
 
     public Action<Vector2Int> OnLevelFinished;
     public Action<Vector2Int, List<Card>> OnLevelCreated;
     public Action<Vector2Int, List<Card>> OnCardFlipped;
+    public Action<Vector2Int> OnLevelRestart;
     public Action<int> OnScoreAdd;
     public Action<int> OnScoreCombo;
 
@@ -43,6 +46,7 @@ public class LevelManager : MonoBehaviour
 
         _gridSize = gridSize;
         SpawnCards(_gridSize); // rows, columns
+        StartCoroutine(ShowAllCardsOnStart(_gridSize));
     }
 
     private bool Validate(Vector2Int gridSize)
@@ -58,10 +62,8 @@ public class LevelManager : MonoBehaviour
         }
         return false;
     }
-
     private void SpawnCards(Vector2Int gridSize) // Instantiate card prefabs as per the gridSize
     {
-        Debug.Log("SaveManager.Instance-> " + SaveManager.Instance);
         var rows = gridSize.x;
         var columns = gridSize.y;
         _shuffledCardsIndex = new int[rows * columns];
@@ -70,7 +72,6 @@ public class LevelManager : MonoBehaviour
             _shuffledCardsIndex[i] = i / 2; // Setup pair of cards.
         }
 
-        List<CardData> savedCardData = null;
         // if we have saved level info, start level from file otherwise create new one
         if (SaveManager.Instance.LoadData(gridSize, out var savedData))
         {
@@ -113,6 +114,49 @@ public class LevelManager : MonoBehaviour
         FindFirstSelected();
 
         OnLevelCreated?.Invoke(gridSize, _cards);
+    }
+
+    public void ShowAllCardsOnRestart() // Reset data on restart
+    {
+        OnLevelRestart?.Invoke(_gridSize);
+    }
+
+    IEnumerator ShowAllCardsOnStart(Vector2Int gridSize) // Show all cards front side at the starting of the game
+    {
+        var rows = gridSize.x;
+        var columns = gridSize.y;
+
+        yield return new WaitForSeconds(0.2f);
+        
+        foreach (Card card in _cards)
+        {
+            card.ShowFront(true);
+        }
+
+        yield return new WaitForSeconds(2f);
+
+        for (var i = 0; i < rows; i++)
+        {
+            for (var j = 0; j < columns; j++)
+            {
+                var cell = i * columns + j;
+                if (savedCardData != null)
+                {
+                    var getSavedCardData = savedCardData[cell];
+                    if (getSavedCardData.isMatched) continue;
+                    if (getSavedCardData.isFlipped == false)
+                    {
+                        //show back
+                        _cards[cell].ShowBack(true);
+                    }
+                }
+                else
+                {
+                    _cards[cell].ShowBack(true);
+                }
+            
+            }
+        }
     }
 
     private void FindFirstSelected()
