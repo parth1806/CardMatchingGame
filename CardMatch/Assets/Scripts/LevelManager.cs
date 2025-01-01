@@ -68,7 +68,7 @@ public class LevelManager : MonoBehaviour
         ShuffleCards();
 
         // update grid layout
-        gridLayoutGroup.constraintCount = columns;
+        gridLayoutGroup.constraintCount = rows;
 
         _cards = new List<Card>(rows * columns);
         _clearedCards = new List<Card>(_cards.Capacity);
