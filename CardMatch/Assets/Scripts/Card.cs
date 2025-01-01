@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class Card : MonoBehaviour
 {
     public int CardId { get; private set; }
+    public bool IsFlipped { get; private set; }
 
     private Sprite _cardFrontImage;
     private Image _cardImage;
@@ -17,17 +18,25 @@ public class Card : MonoBehaviour
     public Action<Card> OnFlipped;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         _cardImage = GetComponent<Image>();
     }
 
-    public void Setup(int cardId, Sprite frontImage)
+    public void Setup(int cardId, Sprite frontImage, bool isFlipped)
     {
         CardId = cardId;
         _cardFrontImage = frontImage;
         gameObject.name = cardId.ToString();
         GetComponent<Button>().onClick.AddListener(OnClicked);
+        if (isFlipped)
+        {
+            ShowFront();
+        }
+        else
+        {
+            ShowBack();
+        }
     }
 
     private void OnClicked()
@@ -42,6 +51,7 @@ public class Card : MonoBehaviour
 
     public void ShowBack()
     {
+        Debug.Log("_cardImage=> " + _cardImage);
         _cardImage.sprite = cardBackImage;
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
-
+using SaveSystem;
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
@@ -22,14 +22,20 @@ public class LevelManager : MonoBehaviour
     private Vector2Int _gridSize;
 
     public Action<Vector2Int> OnLevelFinished;
-
+    public Action<Vector2Int, List<Card>> OnLevelCreated;
+    public Action<Vector2Int, List<Card>> OnCardFlipped;
 
     private void Awake()
     {
         Instance = this;
         _cardSprites = Resources.LoadAll<Sprite>("Cards"); // Get all sprites which is in Resources/Cards folder.
+
     }
 
+    private void Start()
+    {
+        //_cardSprites = Resources.LoadAll<Sprite>("Cards"); // Get all sprites which is in Resources/Cards folder.
+    }
     public void StartLevel(Vector2Int gridSize)
     {
         if (!Validate(gridSize))
@@ -57,6 +63,7 @@ public class LevelManager : MonoBehaviour
 
     private void SpawnCards(Vector2Int gridSize) // Instantiate card prefabs as per the gridSize
     {
+        Debug.Log("SaveManager.Instance-> " + SaveManager.Instance);
         var rows = gridSize.x;
         var columns = gridSize.y;
         _shuffledCardsIndex = new int[rows * columns];
@@ -65,7 +72,17 @@ public class LevelManager : MonoBehaviour
             _shuffledCardsIndex[i] = i / 2; // Setup pair of cards.
         }
 
-        ShuffleCards();
+        List<CardData> savedCardData = null;
+        // if we have saved level info, start level from file otherwise create new one
+        if (SaveManager.Instance.LoadData(gridSize, out var savedData))
+        {
+            savedCardData = savedData.cards;
+            _shuffledCardsIndex = savedCardData.Select(card => card.cardId).ToArray();
+        }
+        else
+        {
+            ShuffleCards();
+        }
 
         // update grid layout
         gridLayoutGroup.constraintCount = rows;
@@ -81,16 +98,46 @@ public class LevelManager : MonoBehaviour
                 var card = Instantiate(cardPrefab, gridLayoutGroup.transform);
                 var cardId = _shuffledCardsIndex[cell];
                 var frontImage = _cardSprites[cardId];
-                card.Setup(cardId, frontImage);
+                var isFlipped = savedCardData != null && savedCardData[cell].isFlipped;
+                var isMatched = savedCardData != null && savedCardData[cell].isMatched;
+                card.Setup(cardId, frontImage,isFlipped);
                 card.OnFlipped += CardFlipped;
                 _cards.Add(card);
+
+                if (isMatched)
+                {
+                    _clearedCards.Add(card);
+                }
+            }
+        }
+
+        // Update First selected in case player selected from last session
+        FindFirstSelected();
+
+        OnLevelCreated?.Invoke(gridSize, _cards);
+    }
+
+    private void FindFirstSelected()
+    {
+        foreach (var card in _cards)
+        {
+            if (card.IsFlipped && !_clearedCards.Contains(card))
+            {
+                _firstSelectedCard = card;
+                break;
             }
         }
     }
 
     private void CardFlipped(Card selectedCard)
     {
+        if (selectedCard.IsFlipped)
+        {
+            return;
+        }
         selectedCard.ShowFront();
+        OnCardFlipped?.Invoke(_gridSize, _cards);
+
         if (_firstSelectedCard == null)
         {
             _firstSelectedCard = selectedCard;
@@ -129,6 +176,8 @@ public class LevelManager : MonoBehaviour
             Debug.Log("Card Not Match");
             firstSelection.ShowBack();
             secondSelection.ShowBack();
+
+            OnCardFlipped?.Invoke(_gridSize, _cards);
         }
     }
 

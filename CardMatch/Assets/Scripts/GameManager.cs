@@ -15,10 +15,12 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         ShowPausePanel(false);
+        LevelManager.Instance.OnLevelCreated += OnLevelCreated;
         LevelManager.Instance.OnLevelFinished += OnLevelFinished;
         string level = PlayerPrefs.GetString("Level");
         LoadLevel(level);
     }
+
     public void LoadLevel(string gridSizeStr)
     {
         var gridSize = gridSizeStr.Split('x');
@@ -29,12 +31,22 @@ public class GameManager : MonoBehaviour
 
     private void OnDisable()
     {
+        LevelManager.Instance.OnLevelCreated -= OnLevelCreated;
         LevelManager.Instance.OnLevelFinished -= OnLevelFinished;
     }
 
     private void OnLevelFinished(Vector2Int vector2Int)
     {
+        // TODO level finished
         Debug.Log("Level Completed");
+    }
+    private void OnLevelCreated(Vector2Int vector2Int, List<Card> cards)
+    {
+        // TODO level finished constructing
+
+        // TODO start timer etc etc
+
+        // TODO start counting how many moves player did to complete the level
     }
 
     public void ShowPausePanel(bool isActive)
