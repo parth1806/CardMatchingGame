@@ -20,10 +20,14 @@ public class LevelManager : MonoBehaviour
     private Card _firstSelectedCard;
     private Card _secondSelectedCard;
     private Vector2Int _gridSize;
+    private int _score = 10;
+    private int _comboMultiplier = 0;
 
     public Action<Vector2Int> OnLevelFinished;
     public Action<Vector2Int, List<Card>> OnLevelCreated;
     public Action<Vector2Int, List<Card>> OnCardFlipped;
+    public Action<int> OnScoreAdd;
+    public Action<int> OnScoreCombo;
 
     private void Awake()
     {
@@ -161,6 +165,9 @@ public class LevelManager : MonoBehaviour
         if (firstSelection.CardId == secondSelection.CardId)
         {
             Debug.Log("Card Match");
+            _comboMultiplier++;
+            OnScoreCombo?.Invoke(_comboMultiplier);
+            OnScoreAdd?.Invoke(_score * _comboMultiplier);
             SoundManager.Instance.CardMatchSfx();
 
             _clearedCards.Add(firstSelection);
@@ -170,6 +177,8 @@ public class LevelManager : MonoBehaviour
         }
         else
         {
+            _comboMultiplier = 0;
+            OnScoreCombo?.Invoke(_comboMultiplier);
             yield return new WaitForSeconds(0.5f);
             SoundManager.Instance.CardNotMatchSfx();
 

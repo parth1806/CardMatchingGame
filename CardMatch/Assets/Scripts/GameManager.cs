@@ -8,8 +8,13 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public GameObject pausePanel;
+    public Text scoreText;
+    public Text scoreComboText;
+
     public int gridRows;
     public int gridColumns;
+
+    private int _levelScore;
 
     // Start is called before the first frame update
     void Start()
@@ -17,6 +22,10 @@ public class GameManager : MonoBehaviour
         ShowPausePanel(false);
         LevelManager.Instance.OnLevelCreated += OnLevelCreated;
         LevelManager.Instance.OnLevelFinished += OnLevelFinished;
+        LevelManager.Instance.OnScoreAdd += OnScoreAdd;
+        LevelManager.Instance.OnScoreCombo += OnShowScoreCombo;
+
+        ShowScore();
         string level = PlayerPrefs.GetString("Level");
         LoadLevel(level);
     }
@@ -33,6 +42,8 @@ public class GameManager : MonoBehaviour
     {
         LevelManager.Instance.OnLevelCreated -= OnLevelCreated;
         LevelManager.Instance.OnLevelFinished -= OnLevelFinished;
+        LevelManager.Instance.OnScoreAdd -= OnScoreAdd;
+        LevelManager.Instance.OnScoreCombo -= OnShowScoreCombo;
     }
 
     private void OnLevelFinished(Vector2Int vector2Int)
@@ -47,6 +58,22 @@ public class GameManager : MonoBehaviour
         // TODO start timer etc etc
 
         // TODO start counting how many moves player did to complete the level
+    }
+
+    private void OnScoreAdd(int score)
+    {
+        _levelScore += score;
+        ShowScore();
+    }
+
+    private void ShowScore()
+    {
+        scoreText.text = "Score: " + _levelScore;
+    }
+
+    private void OnShowScoreCombo(int combo)
+    {
+        scoreComboText.text = "Combo: "+ combo + " X";
     }
 
     public void ShowPausePanel(bool isActive)
